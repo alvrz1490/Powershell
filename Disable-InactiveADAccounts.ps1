@@ -28,6 +28,18 @@ $Report = @()
 $Timestamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 $CsvFile = "$LogPath\Disabled_Users_Report_$Timestamp.csv"
 
+# Check for administrative privileges
+if (!(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $response = Read-Host "The script must be run with administrative privileges. Do you want to run it as an administrator? (y/n)"
+    if ($response -eq "y") {
+        Start-Process powershell.exe -Verb RunAs -ArgumentList "-File $PSCommandPath"
+        exit
+    } else {
+        Write-Error "The script must be run with administrative privileges."
+        exit
+    }
+}
+
 # Ensure Log Directory Exists
 if (!(Test-Path $LogPath)) {
     New-Item -ItemType Directory -Force -Path $LogPath | Out-Null
